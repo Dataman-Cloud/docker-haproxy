@@ -1,0 +1,62 @@
+global
+        #log /dev/log    local0
+        #log /dev/log    local1 notice
+        log 127.0.0.1    local0
+        log 127.0.0.1    local1 notice
+        #chroot /var/lib/haproxy
+        stats socket /run/haproxy/admin.sock mode 660 level admin
+        stats timeout 30s
+        #user haproxy
+        #group haproxy
+        daemon
+        maxconn 30000
+        # process number
+        #nbproc {{ if (le .NBProc 1) }} 1 {{ else }} {{ .NBProc }} {{ end }}
+
+        # Default SSL material locations
+        ca-base /etc/ssl/certs
+        crt-base /etc/ssl/private
+
+        # Default ciphers to use on SSL-enabled listening sockets.
+        # For more information, see ciphers(1SSL).
+        # ssl-default-bind-ciphers kEECDH+aRSA+AES:kRSA+AES:+AES256:RC4-SHA:!kEDH:!LOW:!EXP:!MD5:!aNULL:!eNULL
+
+defaults
+    mode                    http  #...............mode { tcp|http|health }...tcp...4......http...7......health............OK
+    log                     global #...........................
+    option                  httplog #............http............
+    option                  dontlognull #....................................
+    option forwardfor       except 127.0.0.0/8 #..............................
+    option                  redispatch #serverId...........................,.......................................
+    retries                 3 #3.....................................................................
+    timeout http-request    10s  #............
+    timeout queue           1m #............
+    timeout connect         10s #............
+    timeout client          1m #.....................
+    timeout server          1m #.....................
+    timeout http-keep-alive 10s #...............
+    timeout check           10s  #............
+
+    #限制每个转发任务的进程最大链接
+      maxconn                30000 # keepalive
+
+listen stats 
+      bind 0.0.0.0:9000
+      mode http
+      stats enable
+      stats hide-version
+      stats realm Haproxy\ Statistics
+      stats uri /
+     stats auth dataman:dataman
+
+
+listen --SERVICE_NAME-----SERVICE_PORT-- 
+	bind 0.0.0.0:--SERVICE_PORT--
+        mode http
+        balance roundrobin
+        #cookie DM_LB_ID insert indirect nocache
+        option httpclose
+        option forwardfor
+        option tcp-check
+
+--SERVERS--
