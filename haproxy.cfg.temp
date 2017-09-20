@@ -41,7 +41,7 @@ defaults
       maxconn                30000 # keepalive
 
 listen stats 
-      bind 0.0.0.0:9000
+      bind 0.0.0.0:--HAPROXY_STATS_PORT--
       mode http
       stats enable
       stats hide-version

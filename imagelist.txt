@@ -1,0 +1,2 @@
+demoregistry.dataman-inc.com/library/alpine3.4-haproxy-v1.6.9:20170920115944
+demoregistry.dataman-inc.com/library/alpine3.4-haproxy-v1.6.9:latest
